@@ -26,8 +26,8 @@
 
 | 编号 | 关联需求 | 场景 | Given | When | Then | 验证方式 | 状态 |
 |---|---|---|---|---|---|---|---|
-| STU-01 | STU | 正常 | `p01_class` 存在 `id=1`，库中无 `student_no=2024001` | POST `/api/p01/students`，body 含 `student_no=2024001`、`name=张三`、`class_id=1` | 返回 200，`Result.code=0`，`data` 为新主键且 > 0；`select count(*) from p01_student where student_no='2024001'` = 1 | 自动化 | 未验证 |
-| STU-01 | STU | 正常 | 库中存在 3 名学生，其中 2 人 `name` 含「张」 | GET `/api/p01/students?name=张&page=1&size=20` | 返回 200，`data.total=2`，`data.list` 长度 2，每条 `name` 都含「张」，按 `id` 倒序 | 自动化 | 未验证 |
+| AC-STU-01 | REQ-STU-01 | 正常 | `p01_class` 存在 `id=1`，库中无 `student_no=2024001` | POST `/api/p01/students`，body 含 `student_no=2024001`、`name=张三`、`class_id=1` | 返回 200，`Result.code=OK`，`data` 为新主键且 > 0；`select count(*) from p01_student where student_no='2024001'` = 1 | 自动化 | 未验证 |
+| AC-STU-02 | REQ-STU-03 | 正常 | 库中存在 3 名学生，其中 2 人 `name` 含「张」 | GET `/api/p01/students?name=张&page=1&pageSize=20` | 返回 200，`data.total=2`，`data.list` 长度 2，每条 `name` 都含「张」，按 `id` 倒序 | 自动化 | 未验证 |
 
 ## 3. 边界场景
 
@@ -35,14 +35,14 @@
 
 | 编号 | 关联需求 | 场景 | Given | When | Then | 验证方式 | 状态 |
 |---|---|---|---|---|---|---|---|
-| STU-02 | STU | 边界 | `p01_class` 存在 `id=1` | POST `/api/p01/students`，`student_no` 为 20 个字符（字段上限），`name` 为 1 个字符 | 返回 200 且落库成功；`student_no` 长度恰好 20，未被截断 | 自动化 | 未验证 |
-| STU-02 | STU | 边界 | `p01_student` 为空表 | GET `/api/p01/students?page=1&size=20` | 返回 200，`data.total=0`，`data.list` 为空数组（不是 `null`），页面显示「暂无数据」 | 两者 | 未验证 |
+| AC-STU-03 | REQ-STU-01 | 边界 | `p01_class` 存在 `id=1` | POST `/api/p01/students`，`student_no` 为 20 个字符（字段上限），`name` 为 1 个字符 | 返回 200 且落库成功；`student_no` 长度恰好 20，未被截断 | 自动化 | 未验证 |
+| AC-STU-04 | REQ-STU-02 | 边界 | `p01_student` 为空表 | GET `/api/p01/students?page=1&pageSize=20` | 返回 200，`data.total=0`，`data.list` 为空数组（不是 `null`），页面显示「暂无数据」 | 两者 | 未验证 |
 
 补充边界清单（每条都要有对应 `AC-*`，可另开编号）：
 
-- `page=0` 或 `size=0`：入参校验拒绝或归一化为 1 / 20，两种策略选一种并写死
-- `size=101`：超过上限 100，返回 400
-- `student_no` 为 21 个字符：返回 400，提示长度超限
+- `page=0`：入参校验拒绝（`PARAM_INVALID`）或归一化为 1，两种策略选一种并写死
+- `pageSize=0` 与 `pageSize=101`：超过 1–100 区间，返回 `PARAM_INVALID`
+- `student_no` 为 21 个字符：返回 `PARAM_INVALID`，提示长度超限
 - `enroll_date` 为当天：允许通过
 
 ## 4. 异常场景
@@ -51,9 +51,9 @@
 
 | 编号 | 关联需求 | 场景 | Given | When | Then | 验证方式 | 状态 |
 |---|---|---|---|---|---|---|---|
-| STU-03 | STU | 异常 | 库中已存在 `student_no=2024001` | POST `/api/p01/students`，再次提交 `student_no=2024001` | 返回 409，`Result.code=40900`，`message` 含「学号已存在」；`p01_student` 行数不变；无 500 与堆栈外泄 | 自动化 | 未验证 |
-| STU-04 | STU | 异常 | 库中不存在 `p01_class.id=999`；本项目无物理外键，引用靠应用层校验 | POST `/api/p01/students`，`class_id=999` | 返回 400，`Result.code=40002`；不写入任何行；`p01_student` 行数与请求前一致 | 自动化 | 未验证 |
-| STU-01 | STU | 异常 | 库中不存在 `id=99999` 的学生 | PUT `/api/p01/students/99999` | 返回 404，`Result.code=40400`，`message` 含「学生不存在」 | 自动化 | 未验证 |
+| AC-STU-05 | REQ-STU-01 | 异常 | 库中已存在 `student_no=2024001` | POST `/api/p01/students`，再次提交 `student_no=2024001` | 返回 409，`Result.code=STUDENT_NO_DUPLICATED`，`message` 含「学号已存在」；`p01_student` 行数不变；无 500 与堆栈外泄 | 自动化 | 未验证 |
+| AC-STU-06 | BR-STU-16 | 异常 | 库中不存在 `p01_class.id=999`；本项目无物理外键，引用靠应用层校验 | POST `/api/p01/students`，`class_id=999` | 返回 404，`Result.code=CLASS_NOT_FOUND`；不写入任何行；`p01_student` 行数与请求前一致 | 自动化 | 未验证 |
+| AC-STU-07 | REQ-STU-09 | 异常 | 库中不存在 `id=99999` 的学生 | PUT `/api/p01/students/99999` | 返回 404，`Result.code=STUDENT_NOT_FOUND`，`message` 含「学生不存在」 | 自动化 | 未验证 |
 
 异常场景的公共断言（建议抽成测试基类）：
 
@@ -67,8 +67,8 @@
 
 | 编号 | 关联需求 | 场景 | Given | When | Then | 验证方式 | 状态 |
 |---|---|---|---|---|---|---|---|
-| STU-01 | STU | 权限 | 不带 `Authorization` 头 | GET `/api/p01/students` | 返回 401，`Result.code=40100`；不泄露任何学生数据 | 自动化 | 未验证 |
-| STU-02 | STU | 权限 | 已登录但角色为 `VIEWER` | DELETE `/api/p01/students/1` | 返回 403，`Result.code=40300`；`p01_student` 中 `id=1` 仍存在 | 自动化 | 未验证 |
+| AC-STU-08 | REQ-STU-02 | 权限 | 不带 `Authorization` 头 | GET `/api/p01/students` | 返回 401，`Result.code=UNAUTHORIZED`；不泄露任何学生数据 | 自动化 | 未验证 |
+| AC-STU-09 | REQ-STU-10 | 权限 | 已登录但角色为 `VIEWER` | DELETE `/api/p01/students/1` | 返回 403，`Result.code=FORBIDDEN`；`p01_student` 中 `id=1` 仍存在 | 自动化 | 未验证 |
 
 ## 6. 验收条件不可验证的 5 种典型症状
 
@@ -103,8 +103,8 @@
 
 | 验收条件编号 | 执行人 | 执行日期 | 环境 | 结果 | 证据 |
 |---|---|---|---|---|---|
-| STU-02 | <姓名> | <YYYY-MM-DD> | 本地 Chrome 最新版 | 通过 | <截图路径 / 录屏路径> |
-| STU-02 | <姓名> | <YYYY-MM-DD> | 本地，角色 `VIEWER` | 失败：返回 200 | <响应体粘贴，已开 `STU` 缺陷卡> |
+| AC-STU-04 | <姓名> | <YYYY-MM-DD> | 本地 Chrome 最新版 | 通过 | <截图路径 / 录屏路径> |
+| AC-STU-09 | <姓名> | <YYYY-MM-DD> | 本地，角色 `VIEWER` | 失败：返回 200 | <响应体粘贴，已开 `BUG-STU-01` 缺陷卡> |
 
 手工项的要求：
 

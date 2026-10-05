@@ -39,7 +39,7 @@
 > **编号口径**（与 `AGENTS.md` §3.7 一致）：模块段取项目 `requirements.md` 第 0 节**模块字典**里的短码，全大写、序号两位补零。
 > 例：P01 学生模块 `STU` → `TASK-STU-01`、`REQ-STU-01`、`BR-STU-02`、`AC-STU-03`；P02 图书模块 `BOOK` → `TC-BOOK-BORROW-01`。
 > 非功能编号 `NFR-<分类>-<两位序号>`，分类只用固定 8 类缩写：`PERF` / `SEC` / `AVAIL` / `RELIAB` / `MAINT` / `SCALE` / `COMPAT` / `OBS`。
-> 不允许 `REQ-STU-01` 这类小写不补零写法，也不允许一个项目里 `student` 与 `STU` 混用。
+> 不允许 `REQ-stu-1` 这类小写不补零写法，也不允许一个项目里 `student` 与 `STU` 混用。
 
 ## 3. 空白副本（可整段复制）
 

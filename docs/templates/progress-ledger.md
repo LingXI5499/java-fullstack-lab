@@ -25,7 +25,7 @@
 
 > **编号口径**（与 `AGENTS.md` §3.7 一致）：工序号 01–23 全仓库统一，不得自增自减；
 > 表里引用的编号必须写全称——`REQ-STU-01`、`BR-STU-02`、`AC-STU-03`、`TC-STU-CREATE-02`、`TASK-STU-01`、`NFR-PERF-01`；
-> 模块段取项目 `requirements.md` 第 0 节模块字典，全大写、序号两位补零（不写 `REQ-STU-01`，不写光秃秃的 `STU`）。
+> 模块段取项目 `requirements.md` 第 0 节模块字典，全大写、序号两位补零（不写 `REQ-stu-1`，也不写光秃秃的 `STU`）。
 > NFR 分类只用固定 8 类缩写：`PERF` / `SEC` / `AVAIL` / `RELIAB` / `MAINT` / `SCALE` / `COMPAT` / `OBS`。
 
 > **路径约定**：S0–S1 的规格与设计文档按 `delivery-pipeline.md` §2 放 `projects/P0N-<slug>/docs/`；
@@ -151,7 +151,7 @@
 
 - **当前卡在哪里**：工序 14 进行中。`insert` 与 `countByStudentNo` 已写完；`selectPage` 的 `<where>` 动态条件（`name` 模糊 + `age` 区间 + `studentNo` 精确）尚未完成，`pageSize` 上限校验约定为 100（见 `design.md` §5）。
 - **下一步动作**：补齐 `StudentMapper.xml#selectPage` 与 `#countByPage`，然后跑 `mvnw.cmd -Dtest=StudentMapperTest test`。
-- **需要用户决定的问题**：`pageNum<=0` 是"归一为 1"还是"返回 400"？P01 的验证记录（`AV-*`）要求二者写死其一，请拍板。
+- **需要用户决定的问题**：`page<=0` 是"归一为 1"还是"返回 400"？P01 的验证记录（`AV-*`）要求二者写死其一，请拍板。
 - **变更记录**：`2025-03-11` 返工 1 次，原因分类 **设计缺失**，关联 `DISC-STU-01`（seed 手机号重复导致 `uk_p01_student_phone` 建索引失败），处理为清洗种子数据 + 迁移前置探测。
 - **度量**：计划 2025-03-03 ~ 2025-03-18；工序 11–13 实际 8h（AI 8h）；返工 1 次；G1/G2 一次通过。
 

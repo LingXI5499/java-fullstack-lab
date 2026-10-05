@@ -44,7 +44,7 @@
 |---|---|
 | 编号 | `NFR-PERF-01` |
 | 分类 | 性能 |
-| 指标陈述 | 在本地单实例、`p01_student` 有 2000 条种子数据、查询命中 `idx_p01_student_name` 的条件下，`GET /api/p01/students?name=张&page=1&size=20` 的 P95 响应时间必须小于 300ms，测量方法为冒烟脚本连续发 200 次请求后取 95 分位 |
+| 指标陈述 | 在本地单实例、`p01_student` 有 2000 条种子数据、查询命中 `idx_p01_student_name` 的条件下，`GET /api/p01/students?name=张&page=1&pageSize=20` 的 P95 响应时间必须小于 300ms，测量方法为冒烟脚本连续发 200 次请求后取 95 分位 |
 | 测量方式与工具 | `.\tools\lab.ps1 smoke --project P01` 输出 P50 / P95 / P99；慢 SQL 用 `EXPLAIN` 留档到 `projects/P01-student-info/docs/design.md` |
 | 目标值 | P95 < 300ms，P99 < 800ms，慢 SQL（> 200ms）条数为 0 |
 | 验收时机 | S2 联调后测一次，S3 验收前复测并记录 |

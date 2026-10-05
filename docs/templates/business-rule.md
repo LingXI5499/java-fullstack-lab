@@ -44,7 +44,7 @@
 | 规则名称 | 学号全局唯一 |
 | 规则分类 | 数据校验 |
 | 规则陈述 | 当新增或修改学生档案且提交了 `student_no` 时，系统必须先按 `student_no` 查询 `p01_student`，若已存在同号记录则拒绝写入，并返回错误码 `STUDENT_NO_DUPLICATED` |
-| 反面情况 | 返回 HTTP 409，`Result.code=40900`、`Result.message=学号已存在`；事务不产生任何行；表内记录数不变 |
+| 反面情况 | 返回 HTTP 409，`Result.code=STUDENT_NO_DUPLICATED`、`Result.message=学号已存在`；事务不产生任何行；表内记录数不变 |
 | 触发时机 | Service 事务内、`insert` 之前；修改场景需排除自身主键 |
 | 可测试性说明 | 用相同 `student_no` 连续提交两次，第二次必须返回 409 且 `select count(*) from p01_student where student_no=?` 仍为 1 |
 | 关联需求编号 | `STU` |
@@ -78,7 +78,7 @@
 | 规则名称 | 学籍状态按状态机迁移 |
 | 规则分类 | 状态流转 |
 | 规则陈述 | 当请求变更学生学籍状态时，系统必须按状态机判断 `当前状态 --事件--> 目标状态` 是否为合法边，非法边一律拒绝并返回 `STUDENT_STATE_INVALID` |
-| 反面情况 | 返回 HTTP 409，`Result.code=40901`；`p01_student.status` 保持原值；不写入状态变更日志 |
+| 反面情况 | 返回 HTTP 409，`Result.code=STUDENT_STATE_INVALID`；`p01_student.status` 保持原值；不写入状态变更日志 |
 | 触发时机 | Service 事务内、`update` 之前；状态值来自 `enumeration/StudentStatus` |
 | 可测试性说明 | 对一条 `status=SUSPENDED` 的记录提交「毕业」事件，必须返回 409，且再次查询状态仍为 `SUSPENDED` |
 | 关联需求编号 | `STU` |
@@ -118,7 +118,7 @@ private static final Map<StudentStatus, Set<StudentStatus>> ALLOWED = Map.of(
 | 规则名称 | 学生档案乐观锁更新 |
 | 规则分类 | 并发 |
 | 规则陈述 | 当两个请求基于同一版本号修改同一条学生记录时，系统必须只允许先提交者成功，后提交者因版本不匹配被拒绝并返回 `STUDENT_CONCURRENT_MODIFIED` |
-| 反面情况 | 返回 HTTP 409，`Result.code=40902`；不覆盖先提交者的字段；前端提示「数据已被他人修改，请刷新后重试」 |
+| 反面情况 | 返回 HTTP 409，`Result.code=STUDENT_CONCURRENT_MODIFIED`；不覆盖先提交者的字段；前端提示「数据已被他人修改，请刷新后重试」 |
 | 触发时机 | Service 事务内执行 `update ... where id=? and version=?`，随后判断影响行数 |
 | 可测试性说明 | 用 `version=1` 提交两次修改，第二次必须返回 409，且表内 `name` 仍为第一次的值、`version` 为 2 |
 | 关联需求编号 | `STU` |

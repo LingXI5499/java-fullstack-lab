@@ -32,17 +32,17 @@ S1 起草 ──> 与 page-state.md 互校 ──> G2 评审 ──> 冻结（�
 | `POST /borrow/return?id=1` | `POST /borrows/{id}/return` | 状态迁移建模为子资源动作 |
 | `GET /student_list` | `GET /students` | 下划线 + 单复数混用，风格不统一 |
 
-统一前缀 `/api/p0N`（项目号进路径：P01 → `/api/p01`，P02 → `/api/p02`），例如 `GET /api/p01/students`；该前缀之外只放 `/files/**` 静态映射与 `/actuator/health`。
+统一前缀 `/api/p01`（项目号进路径：P01 → `/api/p01`，P02 → `/api/p02`），例如 `GET /api/p01/students`；该前缀之外只放 `/files/**` 静态映射与 `/actuator/health`。
 
 ## 3. 端点表模板
 
 | 方法 | 路径 | 用途 | 请求 DTO | 响应 VO | 成功码 | 主要错误码 | 权限 |
 |---|---|---|---|---|---|---|---|
-| `GET` | `/api/p0N/<资源>` | <列表 / 分页查询> | `<XxxQuery>` | `PageResult<XxxVO>` | 200 | `COMMON_PARAM_INVALID` | `<ANONYMOUS>` |
-| `GET` | `/api/p0N/<资源>/{id}` | <详情> | 路径参数 | `<XxxVO>` | 200 | `<XXX>_NOT_FOUND` | `<ANONYMOUS>` |
-| `POST` | `/api/p0N/<资源>` | <新增> | `<XxxCreateDTO>` | `Long`（新主键） | 201 | `COMMON_PARAM_INVALID`、`<XXX>_NO_DUPLICATED` | `<ROLE_ADMIN>` |
-| `PUT` | `/api/p0N/<资源>/{id}` | <修改> | `<XxxUpdateDTO>` | `Void` | 200 | `<XXX>_NOT_FOUND`、`<XXX>_STATE_CONFLICT` | `<ROLE_ADMIN>` |
-| `DELETE` | `/api/p0N/<资源>/{id}` | <删除（逻辑）> | 路径参数 | `Void` | 200 | `<XXX>_NOT_FOUND` | `<ROLE_ADMIN>` |
+| `GET` | `/api/p01/<资源>` | <列表 / 分页查询> | `<XxxQuery>` | `PageResult<XxxVO>` | 200 | `COMMON_PARAM_INVALID` | `<ANONYMOUS>` |
+| `GET` | `/api/p01/<资源>/{id}` | <详情> | 路径参数 | `<XxxVO>` | 200 | `<XXX>_NOT_FOUND` | `<ANONYMOUS>` |
+| `POST` | `/api/p01/<资源>` | <新增> | `<XxxCreateDTO>` | `Long`（新主键） | 201 | `COMMON_PARAM_INVALID`、`<XXX>_NO_DUPLICATED` | `<ROLE_ADMIN>` |
+| `PUT` | `/api/p01/<资源>/{id}` | <修改> | `<XxxUpdateDTO>` | `Void` | 200 | `<XXX>_NOT_FOUND`、`<XXX>_STATE_CONFLICT` | `<ROLE_ADMIN>` |
+| `DELETE` | `/api/p01/<资源>/{id}` | <删除（逻辑）> | 路径参数 | `Void` | 200 | `<XXX>_NOT_FOUND` | `<ROLE_ADMIN>` |
 
 填表规则：
 
@@ -261,7 +261,7 @@ Select-String -Path docs\api-contract.md -Pattern '^\| `(GET|POST|PUT|DELETE)`' 
 
 ## 填写检查清单
 
-- [ ] 路径全为名词复数 + `/api/p0N` 前缀，没有动词进路径、没有下划线。
+- [ ] 路径全为名词复数 + `/api/p01` 前缀，没有动词进路径、没有下划线。
 - [ ] 端点表「请求 DTO」「响应 VO」列只出现 `dto` / `vo` / `query` 包的类，没有实体。
 - [ ] 「权限」列每行有值，`OWNER` 场景写明了归属过滤落在哪一层。
 - [ ] `Result<T>` 与 `PageResult<T>` 的字段与本节 JSON 完全一致，没有额外自定义包装。

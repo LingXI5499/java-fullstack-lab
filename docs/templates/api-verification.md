@@ -20,7 +20,7 @@
 
 | 端点 | 输入 | 期望 | 实际 | 结论 | 证据 |
 |---|---|---|---|---|---|
-| `GET /api/p01/students` | `pageNum=1&pageSize=10` | `200`，`code=0`，`data.total` 与库内行数一致 | `200`，`total=12`，与 `SELECT COUNT(*)` 一致 | PASS | `evidence/AV-20250311-01/list-page1.json` |
+| `GET /api/p01/students` | `page=1&pageSize=10` | `200`，`code=OK`，`data.total` 与库内行数一致 | `200`，`total=12`，与 `SELECT COUNT(*)` 一致 | PASS | `evidence/AV-20250311-01/list-page1.json` |
 | `<METHOD> <path>` | `<参数或请求体>` | `<状态码 / code / 关键字段>` | `<实际>` | PASS/FAIL | `<文件路径>` |
 
 要求：
@@ -43,7 +43,7 @@ curl -s -X POST "$BASE/api/p01/students" \
   -d '{"studentNo":"S2025001","name":"Zhang San","age":20,"phone":"13800000001"}'
 
 # 3) 条件分页查询
-curl -s "$BASE/api/p01/students?pageNum=1&pageSize=10&name=Zhang"
+curl -s "$BASE/api/p01/students?page=1&pageSize=10&name=Zhang"
 
 # 4) 单条查询
 curl -s "$BASE/api/p01/students/1"
@@ -67,7 +67,7 @@ $body = @{ studentNo = 'S2025001'; name = 'Zhang San'; age = 20; phone = '138000
 $created = Invoke-RestMethod -Method Post -Uri "$base/api/p01/students" -ContentType 'application/json' -Body $body
 $created | ConvertTo-Json -Depth 5   # { "code":0, "message":"ok", "data":1 }
 
-$list = Invoke-RestMethod -Uri "$base/api/p01/students?pageNum=1&pageSize=10"
+$list = Invoke-RestMethod -Uri "$base/api/p01/students?page=1&pageSize=10"
 $list.data.total
 ```
 
@@ -79,7 +79,7 @@ TOKEN=$(curl -s -X POST "$BASE/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"<REDACTED>"}' | jq -r '.data.token')
 
-curl -s "$BASE/api/p06/articles?pageNum=1&pageSize=10" -H "Authorization: Bearer $TOKEN"
+curl -s "$BASE/api/p06/articles?page=1&pageSize=10" -H "Authorization: Bearer $TOKEN"
 
 # 无 token：期望 401
 curl -s -o /dev/null -w "%{http_code}\n" "$BASE/api/p06/articles"
@@ -89,7 +89,7 @@ curl -s -o /dev/null -w "%{http_code}\n" "$BASE/api/p06/articles"
 $login = Invoke-RestMethod -Method Post -Uri "$base/api/auth/login" -ContentType 'application/json' `
   -Body (@{ username = 'admin'; password = $env:LAB_ADMIN_PASSWORD } | ConvertTo-Json)
 $headers = @{ Authorization = "Bearer $($login.data.token)" }
-Invoke-RestMethod -Uri "$base/api/p06/articles?pageNum=1&pageSize=10" -Headers $headers
+Invoke-RestMethod -Uri "$base/api/p06/articles?page=1&pageSize=10" -Headers $headers
 ```
 
 > 口令与密钥**不写进本文件**：从环境变量（`$env:LAB_ADMIN_PASSWORD`）读取，记录里只写 `<REDACTED>`。
@@ -111,13 +111,13 @@ Invoke-RestMethod -Uri "$base/api/p06/articles?pageNum=1&pageSize=10" -Headers $
 
 | 错误类型 | 构造输入 | 期望 | 重点核查 |
 |---|---|---|---|
-| 参数校验失败 | `age=17`、`name` 为空、`phone=138` | `400` + `code=10001` + 字段级 `message` | 不是 500；错误信息不含堆栈与 SQL |
-| 资源不存在 | `GET /api/p01/students/999999` | `404` + `code=10002` | 不返回 `200 + data:null` |
+| 参数校验失败 | `age=17`、`name` 为空、`phone=138` | `400` + `code=PARAM_INVALID` + 字段级 `message` | 不是 500；错误信息不含堆栈与 SQL |
+| 资源不存在 | `GET /api/p01/students/999999` | `404` + `code=STUDENT_NOT_FOUND` | 不返回 `200 + data:null` |
 | 状态冲突 | P02 对已归还借阅单再次归还 | `409` + 状态冲突码 | 不静默成功；不重复加库存 |
-| 重复提交 | 连续两次相同 `studentNo` | 第二次 `409` + `code=10003` | 库里只有 1 行；不产生第二条 |
-| 超大分页 | `pageSize=101` | `400` + `code=10001`（或按约定截断为 100，**必须写死一种**） | 不允许把 `pageSize=100000` 直接打到 SQL |
-| 非法分页 | `pageNum=0`、`pageNum=-1` | `400` 或归一为 1（**写死一种**） | 不出现 `LIMIT -10` 类异常 |
-| 类型错误 | `age="abc"`、`id="xyz"` | `400` + `code=10001` | 不是 `500 MethodArgumentTypeMismatchException` 裸抛 |
+| 重复提交 | 连续两次相同 `studentNo` | 第二次 `409` + `code=STUDENT_NO_DUPLICATED` | 库里只有 1 行；不产生第二条 |
+| 超大分页 | `pageSize=101` | `400` + `code=PARAM_INVALID`（或按约定截断为 100，**必须写死一种**） | 不允许把 `pageSize=100000` 直接打到 SQL |
+| 非法分页 | `page=0`、`page=-1` | `400` 或归一为 1（**写死一种**） | 不出现 `LIMIT -10` 类异常 |
+| 类型错误 | `age="abc"`、`id="xyz"` | `400` + `code=PARAM_INVALID` | 不是 `500 MethodArgumentTypeMismatchException` 裸抛 |
 | 逻辑外键引用不存在 | 新增借阅时 `bookId=999999` | `404` + 引用不存在业务码 | 不是 500；**不产生孤儿行**（无物理外键兜底，必须应用层拦住） |
 | 删除仍被引用的父记录 | 删除仍有在借记录的图书 | `409` + 引用检查业务码 | 不静默删除、不留下孤儿 `p02_borrow` 行 |
 | 非法状态迁移 | P02 `RETURNED → BORROWED` | `409` | 状态机被真正执行 |
@@ -162,18 +162,18 @@ HTTP/1.1 409
 | # | 端点 | 输入 | 期望 | 实际 | 结论 | 证据 |
 |---|---|---|---|---|---|---|
 | 1 | `GET /actuator/health` | 无 | `200`，`status=UP` | `200`，`UP`，MySQL 连通 | PASS | `evidence/AV-20250311-01/health.txt` |
-| 2 | `POST /api/p01/students` | `S2025001, Zhang San, 20, 13800000001` | `200`，`code=0`，`data=13` | `200`，`code=0`，`data=13` | PASS | `create-ok.json` |
-| 3 | `POST /api/p01/students` | 同一 `studentNo` 再提交 | `409`，`code=10003` | `409`，`code=10003`，库内仍 13 行 | PASS | `create-dup.json` |
-| 4 | `POST /api/p01/students` | `age=17` | `400`，`code=10001`，message 指向 `age` | `400`，`code=10001`，`age must be between 18 and 120` | PASS | `create-age17.json` |
-| 5 | `GET /api/p01/students` | `pageNum=1&pageSize=10` | `200`，`total=13` | `200`，`total=13`，10 条 | PASS | `list-page1.json` |
-| 6 | `GET /api/p01/students` | `pageSize=101` | `400`，`code=10001` | `400`，`code=10001`，`pageSize must be <= 100` | PASS | `list-oversize.json` |
-| 7 | `GET /api/p01/students` | `pageNum=0` | 归一为第 1 页，`200` | `200`，返回第 1 页 | PASS | `list-page0.json` |
-| 8 | `GET /api/p01/students/999999` | 不存在的 id | `404`，`code=10002` | `404`，`code=10002` | PASS | `get-404.json` |
-| 9 | `PUT /api/p01/students/13` | `age=21` | `200`，`code=0`，库内 `age=21` | `200`，库内 `age=21`，`updated_at` 变化 | PASS | `update-ok.json` |
-| 10 | `PUT /api/p01/students/13` | `age=121` | `400`，`code=10001`，**`updated_at` 不变** | `400`，`updated_at` 未变 | PASS | `update-age121.json` |
-| 11 | `DELETE /api/p01/students/13` | 已存在 id | `200`，`code=0`，库内行数 12 | `200`，行数 12 | PASS | `delete-ok.json` |
-| 12 | `DELETE /api/p01/students/13` | 重复删除 | `404`，`code=10002` | `404`，`code=10002` | PASS | `delete-again.json` |
-| 13 | `POST /api/p01/students` | `age="abc"` | `400`，`code=10001`，无堆栈 | `400`，`code=10001`，日志无堆栈 | PASS | `create-badtype.json` |
+| 2 | `POST /api/p01/students` | `S2025001, Zhang San, 20, 13800000001` | `200`，`code=OK`，`data=13` | `200`，`code=OK`，`data=13` | PASS | `create-ok.json` |
+| 3 | `POST /api/p01/students` | 同一 `studentNo` 再提交 | `409`，`code=STUDENT_NO_DUPLICATED` | `409`，`code=STUDENT_NO_DUPLICATED`，库内仍 13 行 | PASS | `create-dup.json` |
+| 4 | `POST /api/p01/students` | `age=17` | `400`，`code=PARAM_INVALID`，message 指向 `age` | `400`，`code=PARAM_INVALID`，`age must be between 18 and 120` | PASS | `create-age17.json` |
+| 5 | `GET /api/p01/students` | `page=1&pageSize=10` | `200`，`total=13` | `200`，`total=13`，10 条 | PASS | `list-page1.json` |
+| 6 | `GET /api/p01/students` | `pageSize=101` | `400`，`code=PARAM_INVALID` | `400`，`code=PARAM_INVALID`，`pageSize must be <= 100` | PASS | `list-oversize.json` |
+| 7 | `GET /api/p01/students` | `page=0` | 归一为第 1 页，`200` | `200`，返回第 1 页 | PASS | `list-page0.json` |
+| 8 | `GET /api/p01/students/999999` | 不存在的 id | `404`，`code=STUDENT_NOT_FOUND` | `404`，`code=STUDENT_NOT_FOUND` | PASS | `get-404.json` |
+| 9 | `PUT /api/p01/students/13` | `age=21` | `200`，`code=OK`，库内 `age=21` | `200`，库内 `age=21`，`updated_at` 变化 | PASS | `update-ok.json` |
+| 10 | `PUT /api/p01/students/13` | `age=121` | `400`，`code=PARAM_INVALID`，**`updated_at` 不变** | `400`，`updated_at` 未变 | PASS | `update-age121.json` |
+| 11 | `DELETE /api/p01/students/13` | 已存在 id | `200`，`code=OK`，库内行数 12 | `200`，行数 12 | PASS | `delete-ok.json` |
+| 12 | `DELETE /api/p01/students/13` | 重复删除 | `404`，`code=STUDENT_NOT_FOUND` | `404`，`code=STUDENT_NOT_FOUND` | PASS | `delete-again.json` |
+| 13 | `POST /api/p01/students` | `age="abc"` | `400`，`code=PARAM_INVALID`，无堆栈 | `400`，`code=PARAM_INVALID`，日志无堆栈 | PASS | `create-badtype.json` |
 | 14 | 认证矩阵 #1–#6 | — | — | — | N/A | P01 无 JWT，见 `README.md` 技术新增点 |
 
 **越权与敏感信息核查**：日志中手机号按 `138****0001` 脱敏输出（`handler` 层已配置），响应体不含 `deleted`/`updated_at` 等内部字段。抽查 3 条日志确认。
