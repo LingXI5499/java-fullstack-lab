@@ -2,7 +2,7 @@
 
 > **用途**：为一次可交付版本留下「产物 ↔ 提交 ↔ tag」的完整证据链——半年后仍能回答"这个 JAR 里到底有什么、出事怎么回滚"。
 > **填写时机**：S3 验证与交付阶段，**G4 发布闸门之前**必须填完第 1–9 节；执行 `.\tools\lab.ps1 tag` 之后再回填 tag 与 commit hash，并复查第 7 节。
-> **产出位置**：`projects/P0N-<slug>/docs/release-record.md`，同时归档一份到 `docs/projects/P0N/release-record.md`。
+> **产出位置**：`projects/P0N-<slug>/docs/release-record.md`，同时归档一份到 `projects/P0N-<slug>/docs/release-record.md`。
 
 ## 1. 版本标识
 

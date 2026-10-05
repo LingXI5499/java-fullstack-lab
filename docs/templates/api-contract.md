@@ -32,17 +32,17 @@ S1 起草 ──> 与 page-state.md 互校 ──> G2 评审 ──> 冻结（�
 | `POST /borrow/return?id=1` | `POST /borrows/{id}/return` | 状态迁移建模为子资源动作 |
 | `GET /student_list` | `GET /students` | 下划线 + 单复数混用，风格不统一 |
 
-统一前缀 `/api/v1`（版本进路径），例如 `GET /api/v1/students`；`/api/v1` 之外只放 `/files/**` 静态映射与 `/actuator/health`。
+统一前缀 `/api/p0N`（项目号进路径：P01 → `/api/p01`，P02 → `/api/p02`），例如 `GET /api/p01/students`；该前缀之外只放 `/files/**` 静态映射与 `/actuator/health`。
 
 ## 3. 端点表模板
 
 | 方法 | 路径 | 用途 | 请求 DTO | 响应 VO | 成功码 | 主要错误码 | 权限 |
 |---|---|---|---|---|---|---|---|
-| `GET` | `/api/v1/<资源>` | <列表 / 分页查询> | `<XxxQuery>` | `PageResult<XxxVO>` | 200 | `COMMON_PARAM_INVALID` | `<ANONYMOUS>` |
-| `GET` | `/api/v1/<资源>/{id}` | <详情> | 路径参数 | `<XxxVO>` | 200 | `<XXX>_NOT_FOUND` | `<ANONYMOUS>` |
-| `POST` | `/api/v1/<资源>` | <新增> | `<XxxCreateDTO>` | `Long`（新主键） | 201 | `COMMON_PARAM_INVALID`、`<XXX>_NO_DUPLICATED` | `<ROLE_ADMIN>` |
-| `PUT` | `/api/v1/<资源>/{id}` | <修改> | `<XxxUpdateDTO>` | `Void` | 200 | `<XXX>_NOT_FOUND`、`<XXX>_STATE_CONFLICT` | `<ROLE_ADMIN>` |
-| `DELETE` | `/api/v1/<资源>/{id}` | <删除（逻辑）> | 路径参数 | `Void` | 200 | `<XXX>_NOT_FOUND` | `<ROLE_ADMIN>` |
+| `GET` | `/api/p0N/<资源>` | <列表 / 分页查询> | `<XxxQuery>` | `PageResult<XxxVO>` | 200 | `COMMON_PARAM_INVALID` | `<ANONYMOUS>` |
+| `GET` | `/api/p0N/<资源>/{id}` | <详情> | 路径参数 | `<XxxVO>` | 200 | `<XXX>_NOT_FOUND` | `<ANONYMOUS>` |
+| `POST` | `/api/p0N/<资源>` | <新增> | `<XxxCreateDTO>` | `Long`（新主键） | 201 | `COMMON_PARAM_INVALID`、`<XXX>_NO_DUPLICATED` | `<ROLE_ADMIN>` |
+| `PUT` | `/api/p0N/<资源>/{id}` | <修改> | `<XxxUpdateDTO>` | `Void` | 200 | `<XXX>_NOT_FOUND`、`<XXX>_STATE_CONFLICT` | `<ROLE_ADMIN>` |
+| `DELETE` | `/api/p0N/<资源>/{id}` | <删除（逻辑）> | 路径参数 | `Void` | 200 | `<XXX>_NOT_FOUND` | `<ROLE_ADMIN>` |
 
 填表规则：
 
@@ -55,11 +55,11 @@ S1 起草 ──> 与 page-state.md 互校 ──> G2 评审 ──> 冻结（�
 
 ```json
 // Result<T>：所有端点
-{ "code": 200, "message": "OK", "data": { } }
+{ "code": "OK", "message": "OK", "data": { } }
 
 // PageResult<T>：所有分页端点，放在 Result.data 内
 {
-  "code": 200,
+  "code": "OK",
   "message": "OK",
   "data": {
     "page": 1,
@@ -78,7 +78,7 @@ S1 起草 ──> 与 page-state.md 互校 ──> G2 评审 ──> 冻结（�
 @NoArgsConstructor
 @AllArgsConstructor
 public class Result<T> {
-    private Integer code;      // 200 成功；其余见第 5 节错误码表
+    private String code;       // "OK" 表示成功；失败取第 5 节错误码表里的错误码字符串
     private String message;    // 用户可见文案，前端可直接展示
     private T data;            // 失败时可为 null 或字段错误列表
 }
@@ -96,7 +96,7 @@ public class PageResult<T> {
 }
 ```
 
-字段说明：`code` 与 HTTP 状态码**同时**表达结果（HTTP 给网关与浏览器，`code` 给业务分支）；`message` 是用户可见文案，禁止把异常堆栈或 SQL 片段放进来；分页的 `total` 必须在同一次查询里用 `COUNT(*)` 得到，不允许前端累加。
+字段说明：`code` 是业务错误码字符串（成功固定 `"OK"`），与 HTTP 状态码**同时**表达结果（HTTP 给网关与浏览器，`code` 给业务分支）；`message` 是用户可见文案，禁止把异常堆栈或 SQL 片段放进来；分页的 `total` 必须在同一次查询里用 `COUNT(*)` 得到，不允许前端累加。
 
 ## 5. 错误码表模板
 
@@ -112,6 +112,7 @@ public class PageResult<T> {
 规则：
 
 - 错误码 = **大写下划线**，模块前缀 + 语义后缀（`TICKET_STATE_CONFLICT`、`STUDENT_NO_DUPLICATED`），**不把 HTTP 状态写进名字**。
+- `Result.code` 用的就是本表的错误码字符串（成功固定 `"OK"`）；HTTP 状态由响应行与异常基类的 `httpStatus` 决定，两者不互相替代、也不写进彼此的名字。
 - **一个错误码对应一个异常子类**，落在 `exception` 包；禁止「集中式静态工厂 + 通用 ApiException」。
 - 基类持有 `code / message / httpStatus`，由 `handler` 包的全局异常处理器统一转成 `Result`；Controller 不写 `try/catch`。
 - 同一个错误码的文案只有一处来源（异常子类的构造），前端不再改字。
@@ -149,14 +150,14 @@ public class StudentCreateDTO {
 |---|---|
 | 触发入口 | Controller 方法参数上加 `@Valid`（嵌套对象加 `@Valid`），不加 `@Validated` 分组时默认全量校验 |
 | 分组校验 | 新增用 `Save.class`、修改用 `Update.class`，`id` 只在 `Update.class` 里 `@NotNull` |
-| 校验失败结构 | `code = 400`，`message = "参数校验失败"`，`data` 为 `List<FieldErrorVO>`（`vo` 包） |
+| 校验失败结构 | `code = "COMMON_PARAM_INVALID"`，`message = "参数校验失败"`，`data` 为 `List<FieldErrorVO>`（`vo` 包） |
 | 统一出口 | `MethodArgumentNotValidException` / `ConstraintViolationException` 在 `GlobalExceptionHandler` 里转成上面的结构 |
 | 禁止 | 在 Controller 里写 `if (dto.getXxx() == null) return Result.fail(...)`；在 Service 里重复做格式校验（业务规则校验归 Service） |
 
 ```json
 // 校验失败的响应
 {
-  "code": 400,
+  "code": "COMMON_PARAM_INVALID",
   "message": "参数校验失败",
   "data": [
     { "field": "studentNo", "message": "学号必须是 8 位数字" },
@@ -173,7 +174,7 @@ public class StudentCreateDTO {
 | `pageSize` | `int` | 10 | 1–100 | 超过 100 取 100（不做静默变 0） |
 | `sortBy` | `String` | `id` | **白名单**：`id` / `studentNo` / `name` / `createdAt` | 白名单外的值返回 `COMMON_PARAM_INVALID` |
 | `sortOrder` | `String` | `asc` | `asc` / `desc` | 大小写不敏感，转小写后再判断 |
-| `keyword` | `String` | 无 | 去首尾空格，长度 ≤ 50 | 模糊匹配，是否走索引见 `data-design.md#5` |
+| `keyword` | `String` | 无 | 去首尾空格，长度 ≤ 50 | 模糊匹配，是否走索引见 `data-design.md#7` |
 
 ```xml
 <!-- Mapper XML：排序字段用 choose 映射到列名，绝不出现 ORDER BY ${sortBy} -->
@@ -197,17 +198,17 @@ LIMIT #{offset}, #{pageSize}
 
 | 方法 | 路径 | 用途 | 请求 DTO | 响应 VO | 成功码 | 主要错误码 | 权限 |
 |---|---|---|---|---|---|---|---|
-| `GET` | `/api/v1/students` | 列表分页 + 条件筛选 | `StudentQuery` | `PageResult<StudentVO>` | 200 | `COMMON_PARAM_INVALID` | `ANONYMOUS` |
-| `GET` | `/api/v1/students/{id}` | 详情 | 路径参数 | `StudentVO` | 200 | `STUDENT_NOT_FOUND` | `ANONYMOUS` |
-| `POST` | `/api/v1/students` | 新增 | `StudentCreateDTO` | `Long` | 201 | `COMMON_PARAM_INVALID`、`STUDENT_NO_DUPLICATED` | `ANONYMOUS` |
-| `PUT` | `/api/v1/students/{id}` | 修改 | `StudentUpdateDTO` | `Void` | 200 | `STUDENT_NOT_FOUND`、`STUDENT_NO_DUPLICATED` | `ANONYMOUS` |
-| `DELETE` | `/api/v1/students/{id}` | 删除（逻辑） | 路径参数 | `Void` | 200 | `STUDENT_NOT_FOUND` | `ANONYMOUS` |
-| `GET` | `/api/v1/students/options` | 条件搜索（下拉补全用） | `keyword`、`limit` | `List<StudentOptionVO>` | 200 | `COMMON_PARAM_INVALID` | `ANONYMOUS` |
+| `GET` | `/api/p01/students` | 列表分页 + 条件筛选 | `StudentQuery` | `PageResult<StudentVO>` | 200 | `COMMON_PARAM_INVALID` | `ANONYMOUS` |
+| `GET` | `/api/p01/students/{id}` | 详情 | 路径参数 | `StudentVO` | 200 | `STUDENT_NOT_FOUND` | `ANONYMOUS` |
+| `POST` | `/api/p01/students` | 新增 | `StudentCreateDTO` | `Long` | 201 | `COMMON_PARAM_INVALID`、`STUDENT_NO_DUPLICATED` | `ANONYMOUS` |
+| `PUT` | `/api/p01/students/{id}` | 修改 | `StudentUpdateDTO` | `Void` | 200 | `STUDENT_NOT_FOUND`、`STUDENT_NO_DUPLICATED` | `ANONYMOUS` |
+| `DELETE` | `/api/p01/students/{id}` | 删除（逻辑） | 路径参数 | `Void` | 200 | `STUDENT_NOT_FOUND` | `ANONYMOUS` |
+| `GET` | `/api/p01/students/options` | 条件搜索（下拉补全用） | `keyword`、`limit` | `List<StudentOptionVO>` | 200 | `COMMON_PARAM_INVALID` | `ANONYMOUS` |
 
 ```json
-// GET /api/v1/students?page=1&pageSize=10&classId=12&keyword=张&sortBy=studentNo&sortOrder=asc
+// GET /api/p01/students?page=1&pageSize=10&classId=12&keyword=张&sortBy=studentNo&sortOrder=asc
 {
-  "code": 200,
+  "code": "OK",
   "message": "OK",
   "data": {
     "page": 1,
@@ -229,17 +230,17 @@ LIMIT #{offset}, #{pageSize}
   }
 }
 
-// POST /api/v1/students 请求体
+// POST /api/p01/students 请求体
 { "studentNo": "20260001", "name": "张三", "gender": "MALE", "classId": 12, "enrollYear": 2026 }
 
-// POST /api/v1/students 成功响应（201）
-{ "code": 201, "message": "新增成功", "data": 1001 }
+// POST /api/p01/students 成功响应（201）
+{ "code": "OK", "message": "新增成功", "data": 1001 }
 
-// GET /api/v1/students/999999 失败响应（404）
-{ "code": 404, "message": "学生不存在或已被删除", "data": null }
+// GET /api/p01/students/999999 失败响应（404）
+{ "code": "STUDENT_NOT_FOUND", "message": "学生不存在或已被删除", "data": null }
 
 // POST 学号重复 失败响应（409）
-{ "code": 409, "message": "学号 20260001 已存在", "data": null }
+{ "code": "STUDENT_NO_DUPLICATED", "message": "学号 20260001 已存在", "data": null }
 ```
 
 P01 错误码对应关系：`STUDENT_NOT_FOUND` → `StudentNotFoundException`；`STUDENT_NO_DUPLICATED` → `StudentNoDuplicatedException`（由 `uk_p01_student_student_no` 唯一索引冲突触发，Service 捕获 `DuplicateKeyException` 后抛出，禁止先查后插做判断）；`COMMON_PARAM_INVALID` → `ParamInvalidException`。
@@ -260,10 +261,11 @@ Select-String -Path docs\api-contract.md -Pattern '^\| `(GET|POST|PUT|DELETE)`' 
 
 ## 填写检查清单
 
-- [ ] 路径全为名词复数 + `/api/v1` 前缀，没有动词进路径、没有下划线。
+- [ ] 路径全为名词复数 + `/api/p0N` 前缀，没有动词进路径、没有下划线。
 - [ ] 端点表「请求 DTO」「响应 VO」列只出现 `dto` / `vo` / `query` 包的类，没有实体。
 - [ ] 「权限」列每行有值，`OWNER` 场景写明了归属过滤落在哪一层。
 - [ ] `Result<T>` 与 `PageResult<T>` 的字段与本节 JSON 完全一致，没有额外自定义包装。
+- [ ] `Result.code` 是业务错误码字符串（成功为 `"OK"`），HTTP 状态与错误码没有混用。
 - [ ] 每个非 200 的错误都有错误码行，且对应一个 `exception` 包里的子类。
 - [ ] 错误码是大写下划线、模块前缀，没有把 HTTP 状态塞进名字。
 - [ ] 校验规则写在 DTO 注解上，Controller 里没有手写 `if (xxx == null)`。

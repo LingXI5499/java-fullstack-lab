@@ -5,16 +5,26 @@
 
 ## 使用方式
 
-1. 在 S0 开始前，把需要的模板复制到 `docs/projects/P0N/` 下并改名（例如 `requirement-card.md` → `requirements.md`）。
+1. 在 S0 开始前，把需要的模板复制到项目自己的文档目录 `projects/P0N-<slug>/docs/` 下并改名
+   （例如 `requirement-card.md` → `requirements.md`）。路径裁决见
+   [交付流水线规范第 1 节](../pipeline/delivery-pipeline.md#路径裁决此前模板之间有过冲突以此为准)。
 2. 占位符统一写成 `<...>`，填完即删掉尖括号。
 3. 每份模板末尾都有「填写检查清单」，**清单没有全部勾选就不算这一步完成**。
 
 ```powershell
-# 工序 01：起一个项目的文档骨架
-$p = "docs\projects\P01"
-Copy-Item docs\templates\project-charter.md "$p\charter.md"
-Copy-Item docs\templates\progress-ledger.md "$p\progress.md"
+# 工序 01：起一个项目的文档骨架（P01 的 slug 是 student-info）
+$p = "projects\P01-student-info\docs"
+New-Item -ItemType Directory -Force $p, "$p\adr" | Out-Null
+Copy-Item docs\templates\project-charter.md     "$p\charter.md"
+Copy-Item docs\templates\requirement-card.md    "$p\requirements.md"
+Copy-Item docs\templates\progress-ledger.md     "$p\progress.md"
+Copy-Item docs\templates\discovery-record.md    "$p\discovery.md"
+Copy-Item docs\templates\test-plan.md           "$p\testing.md"
+Copy-Item docs\templates\release-record.md      "$p\release.md"
+Copy-Item docs\templates\retrospective.md       "$p\retrospective.md"
 ```
+
+`docs/projects/` 只用于**尚未建立代码目录的项目**做草稿；一旦进入工序 11，文档就移进 `projects/P0N-<slug>/docs/`。
 
 ---
 

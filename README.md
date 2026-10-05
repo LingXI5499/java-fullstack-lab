@@ -125,7 +125,7 @@ cd projects\P01-student-info\backend; .\mvnw.cmd spring-boot:run
 cd projects\P01-student-info\frontend; pnpm install; pnpm dev
 ```
 
-每个项目的 `README.md` 都有一份可在**陌生机器**上复现的 Quick Start（受 AC-STU-08 约束）。
+每个项目的 `README.md` 都有一份可在**陌生机器**上复现的 Quick Start（受 AC-{0}-0{1} 约束）。
 
 ## 版本与 tag
 

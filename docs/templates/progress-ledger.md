@@ -23,20 +23,29 @@
 
 **不变量**：任一时刻 `projects/` 下只能有**一个**处于 `IN_PROGRESS` 的项目（铁律一）。若本表出现第二个项目的账本，先停手并说明原因。
 
+> **编号口径**（与 `AGENTS.md` §3.7 一致）：工序号 01–23 全仓库统一，不得自增自减；
+> 表里引用的编号必须写全称——`REQ-STU-01`、`BR-STU-02`、`AC-STU-03`、`TC-STU-CREATE-02`、`TASK-STU-01`、`NFR-PERF-01`；
+> 模块段取项目 `requirements.md` 第 0 节模块字典，全大写、序号两位补零（不写 `REQ-STU-01`，不写光秃秃的 `STU`）。
+> NFR 分类只用固定 8 类缩写：`PERF` / `SEC` / `AVAIL` / `RELIAB` / `MAINT` / `SCALE` / `COMPAT` / `OBS`。
+
+> **路径约定**：S0–S1 的规格与设计文档按 `delivery-pipeline.md` §2 放 `projects/P0N-<slug>/docs/`；
+> S2–S3 的产出物随代码放 `projects/P0N-<slug>/`（`backend/` `frontend/` `database/` `test/` `deploy/` `docs/`）。
+> 同一份内容只留一处，禁止两处各写一份。
+
 ## 2. 阶段账本表（23 工序）
 
 | 阶段 | 工序 | 工序名 | 状态 | 负责人 | 产出物 | 门禁 | 完成日期 |
 |---|---|---|---|---|---|---|---|
-| S0 | 01 | 项目章程 | OPEN | AI | `docs/projects/P0N/charter.md` | G1 | — |
-| S0 | 02 | 需求卡 | OPEN | BOTH | `docs/projects/P0N/requirements.md` | G1 | — |
-| S0 | 03 | 业务规则 | OPEN | BOTH | `docs/projects/P0N/requirements.md`（规则节） | G1 | — |
-| S0 | 04 | 验收条件 | OPEN | BOTH | `docs/projects/P0N/requirements.md`（验收节） | G1 | — |
-| S0 | 05 | 非功能需求 | OPEN | BOTH | `docs/projects/P0N/requirements.md`（NFR 节） | G1 | — |
-| S1 | 06 | 数据设计 | OPEN | AI | `docs/projects/P0N/design.md`（数据节） | G2 | — |
-| S1 | 07 | API 契约 | OPEN | AI | `docs/projects/P0N/design.md`（接口节） | G2 | — |
-| S1 | 08 | 模块与包结构 | OPEN | AI | `docs/projects/P0N/design.md`（结构节） | G2 | — |
-| S1 | 09 | 页面与状态 | OPEN | AI | `docs/projects/P0N/design.md`（前端节） | G2 | — |
-| S1 | 10 | 决策记录 | OPEN | AI | `docs/projects/P0N/adr/ADR-*.md` | G2 | — |
+| S0 | 01 | 项目章程 | OPEN | AI | `projects/P0N-<slug>/docs/charter.md` | G1 | — |
+| S0 | 02 | 需求卡 | OPEN | BOTH | `projects/P0N-<slug>/docs/requirements.md` | G1 | — |
+| S0 | 03 | 业务规则 | OPEN | BOTH | `projects/P0N-<slug>/docs/requirements.md`（规则节） | G1 | — |
+| S0 | 04 | 验收条件 | OPEN | BOTH | `projects/P0N-<slug>/docs/requirements.md`（验收节） | G1 | — |
+| S0 | 05 | 非功能需求 | OPEN | BOTH | `projects/P0N-<slug>/docs/requirements.md`（NFR 节） | G1 | — |
+| S1 | 06 | 数据设计 | OPEN | AI | `projects/P0N-<slug>/docs/design.md`（数据节） | G2 | — |
+| S1 | 07 | API 契约 | OPEN | AI | `projects/P0N-<slug>/docs/design.md`（接口节） | G2 | — |
+| S1 | 08 | 模块与包结构 | OPEN | AI | `projects/P0N-<slug>/docs/design.md`（结构节） | G2 | — |
+| S1 | 09 | 页面与状态 | OPEN | AI | `projects/P0N-<slug>/docs/design.md`（前端节） | G2 | — |
+| S1 | 10 | 决策记录 | OPEN | AI | `projects/P0N-<slug>/docs/adr/ADR-*.md` | G2 | — |
 | S2 | 11 | 脚手架 | OPEN | AI | `projects/P0N-<slug>/backend/` `frontend/` `deploy/` | — | — |
 | S2 | 12 | 迁移与种子 | OPEN | AI | `database/migrations/V*.sql` `database/seed.sql` | — | — |
 | S2 | 13 | Entity / DTO / VO / Query | OPEN | AI | `backend/src/main/java/<base>/entity|dto|vo|query/` | — | — |
@@ -113,16 +122,16 @@
 
 | 阶段 | 工序 | 工序名 | 状态 | 负责人 | 产出物 | 门禁 | 完成日期 |
 |---|---|---|---|---|---|---|---|
-| S0 | 01 | 项目章程 | DONE | AI | `docs/projects/P01/charter.md` | G1 | 2025-03-03 |
-| S0 | 02 | 需求卡 | DONE | BOTH | `docs/projects/P01/requirements.md` | G1 | 2025-03-03 |
-| S0 | 03 | 业务规则 | DONE | BOTH | 同上（`STU`…`004`） | G1 | 2025-03-04 |
-| S0 | 04 | 验收条件 | DONE | BOTH | 同上（`STU`…`006`） | G1 | 2025-03-04 |
-| S0 | 05 | 非功能需求 | DONE | BOTH | 同上（`NFR-性能-001`、`NFR-可测-001`） | G1 | 2025-03-04 |
-| S1 | 06 | 数据设计 | DONE | AI | `docs/projects/P01/design.md` §3 | G2 | 2025-03-05 |
+| S0 | 01 | 项目章程 | DONE | AI | `projects/P01-student-info/docs/charter.md` | G1 | 2025-03-03 |
+| S0 | 02 | 需求卡 | DONE | BOTH | `projects/P01-student-info/docs/requirements.md` | G1 | 2025-03-03 |
+| S0 | 03 | 业务规则 | DONE | BOTH | 同上（`BR-STU-01`…`BR-STU-04`） | G1 | 2025-03-04 |
+| S0 | 04 | 验收条件 | DONE | BOTH | 同上（`AC-STU-01`…`AC-STU-06`） | G1 | 2025-03-04 |
+| S0 | 05 | 非功能需求 | DONE | BOTH | 同上（`NFR-PERF-01`、`NFR-MAINT-01`） | G1 | 2025-03-04 |
+| S1 | 06 | 数据设计 | DONE | AI | `projects/P01-student-info/docs/design.md` §3 | G2 | 2025-03-05 |
 | S1 | 07 | API 契约 | DONE | AI | 同上 §5（5 个端点） | G2 | 2025-03-06 |
 | S1 | 08 | 模块与包结构 | DONE | AI | 同上 §6 | G2 | 2025-03-06 |
 | S1 | 09 | 页面与状态 | DONE | AI | 同上 §7（列表 / 新建 / 编辑） | G2 | 2025-03-07 |
-| S1 | 10 | 决策记录 | DONE | AI | `docs/projects/P01/adr/ADR-001~003.md` | G2 | 2025-03-07 |
+| S1 | 10 | 决策记录 | DONE | AI | `projects/P01-student-info/docs/adr/ADR-001~003.md` | G2 | 2025-03-07 |
 | S2 | 11 | 脚手架 | DONE | AI | `projects/P01-student-info/backend/` `frontend/` | — | 2025-03-08 |
 | S2 | 12 | 迁移与种子 | DONE | AI | `database/migrations/V1__init_student.sql` `seed.sql` | — | 2025-03-11 |
 | S2 | 13 | Entity / DTO / VO / Query | DONE | AI | `entity/Student.java`、`dto/StudentCreateDTO.java`、`query/StudentQuery.java` | — | 2025-03-11 |
@@ -143,7 +152,7 @@
 - **当前卡在哪里**：工序 14 进行中。`insert` 与 `countByStudentNo` 已写完；`selectPage` 的 `<where>` 动态条件（`name` 模糊 + `age` 区间 + `studentNo` 精确）尚未完成，`pageSize` 上限校验约定为 100（见 `design.md` §5）。
 - **下一步动作**：补齐 `StudentMapper.xml#selectPage` 与 `#countByPage`，然后跑 `mvnw.cmd -Dtest=StudentMapperTest test`。
 - **需要用户决定的问题**：`pageNum<=0` 是"归一为 1"还是"返回 400"？P01 的验证记录（`AV-*`）要求二者写死其一，请拍板。
-- **变更记录**：`2025-03-11` 返工 1 次，原因分类 **设计缺失**，关联 `DISC-student-001`（seed 手机号重复导致 `uk_p01_student_phone` 建索引失败），处理为清洗种子数据 + 迁移前置探测。
+- **变更记录**：`2025-03-11` 返工 1 次，原因分类 **设计缺失**，关联 `DISC-STU-01`（seed 手机号重复导致 `uk_p01_student_phone` 建索引失败），处理为清洗种子数据 + 迁移前置探测。
 - **度量**：计划 2025-03-03 ~ 2025-03-18；工序 11–13 实际 8h（AI 8h）；返工 1 次；G1/G2 一次通过。
 
 ## 填写检查清单

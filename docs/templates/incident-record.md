@@ -2,7 +2,7 @@
 
 > **用途**：把一次真实故障的定位路径、根因与回归测试固化下来，让同类问题第二次出现时能被门禁拦住，而不是靠人回忆。
 > **填写时机**：S3 验证与交付阶段起任何一次故障处置**结束后 24 小时内**；若故障暴露了规格缺失，需在「复盘升级」环节同步产出技能升级提案。
-> **产出位置**：`projects/P0N-<slug>/docs/incidents/INC-P0N-<序号>.md`，同一内容归档到 `docs/projects/P0N/incidents/`。
+> **产出位置**：`projects/P0N-<slug>/docs/incidents/INC-P0N-<序号>.md`，同一内容归档到 `projects/P0N-<slug>/docs/incidents/`。
 
 ## 1. 编号与时间
 

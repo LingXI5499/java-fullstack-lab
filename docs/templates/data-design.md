@@ -25,7 +25,7 @@
 | 关联字段 | `<被引用表单数>_id` | 如 `p01_student.class_id`、`p02_borrow.book_id`；**必须建普通索引** |
 | 约束前缀 | `uk_` / `idx_` / `ck_` | 唯一约束 / 普通索引 / 检查约束；本仓库**没有**数据库层外键，见第 5 节 |
 | 字符集与排序规则 | `utf8mb4` / `utf8mb4_general_ci` | 建表显式声明，避免继承服务器默认值 |
-| 引擎 | `InnoDB` | 事务与外键的前提 |
+| 引擎 | `InnoDB` | 事务与行锁的前提 |
 | 时间类型 | `datetime` | 不用 `timestamp`（避免 2038 与隐式时区转换） |
 | 迁移脚本 | `database/migrations/V<版本>__<说明>.sql` | 如 `V20260105__add_book_isbn.sql` |
 
@@ -76,8 +76,7 @@ ALTER TABLE p02_borrow
 
 - 类型只从这批里选：`bigint unsigned` / `int unsigned` / `tinyint(1)` / `varchar(n)` / `char(n)` / `decimal(10,2)` / `date` / `datetime` / `text`。
 - 业务键（学号、ISBN、订单号）必须 `NOT NULL` + `uk_`；金额必须 `decimal`，禁用 `float`。
-- 关联字段必须 `NOT NULL` + `idx_`；「关联」列写明被引用表与列，并在第 5 节登记对应的存在性校验。
-- 每张表都带 `is_deleted tinyint(1) NOT NULL DEFAULT 0`、`created_at`、`updated_at`（见第 9 节）。
+- 关联字段必须 `NOT NULL` + `idx_`，并在「关联」列写明被引用表与列、在第 5 节登记存在性校验；每张表都带 `is_deleted tinyint(1) NOT NULL DEFAULT 0`、`created_at`、`updated_at`（见第 9 节）。
 - 「是否索引」列不允许空着：不建索引要写「否」，并在第 7 节说明为什么不该建。
 
 ## 5. 逻辑外键 vs 物理外键（本仓库铁律）
@@ -170,14 +169,11 @@ LIMIT 0, 10;
 ```sql
 -- 第 1 步 扩展：只加可空列，不影响在跑的业务
 ALTER TABLE p02_book ADD COLUMN isbn varchar(20) NULL COMMENT 'ISBN' AFTER title;
-
 -- 第 2 步 迁移：回填历史行（分批执行，避免长事务）
 UPDATE p02_book SET isbn = CONCAT('UNKNOWN-', id) WHERE isbn IS NULL;
-
 -- 第 3 步 收缩：数据齐了再收紧约束
 ALTER TABLE p02_book MODIFY COLUMN isbn varchar(20) NOT NULL COMMENT 'ISBN';
 ALTER TABLE p02_book ADD CONSTRAINT uk_p02_book_isbn UNIQUE (isbn);
-
 -- 回滚（与上面一一对应，按逆序执行）
 ALTER TABLE p02_book DROP INDEX uk_p02_book_isbn;
 ALTER TABLE p02_book DROP COLUMN isbn;
@@ -191,8 +187,6 @@ ALTER TABLE p02_book DROP COLUMN isbn;
 | 逻辑删除 `is_deleted tinyint(1)` | 可恢复、可追溯；子记录仍指向有效父行；误删可救 | 每个查询都必须带 `is_deleted = 0`，漏写就出脏数据；唯一索引与删除冲突；表持续增长 | **采用**：所有业务表统一带该列，Mapper XML 用 `<sql>` 片段统一带条件 |
 
 唯一索引与逻辑删除的冲突必须显式处理：`uk_p01_student_student_no (student_no)` 会让「删除后再用同一学号」插入失败。两种做法二选一，并在本节写明：① 删除时改写业务键（`student_no = CONCAT(student_no, '#', id)`）；② 唯一键改为 `(student_no, is_deleted)`（代价是同一学号最多删一次）。本仓库默认用 ①。
-
-逻辑删除还改变了「删除父记录」的含义：父行仍在表里，子记录的关联字段不会失效，所以**引用检查必须自己写**（`WHERE class_id = ? AND is_deleted = 0`），不能指望数据库拦。
 
 时间字段统一：`created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP`、`updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`；时区由连接串 `serverTimezone=Asia/Shanghai` 固定（见 `docs/dev-env.md`）。
 
@@ -226,7 +220,6 @@ CREATE TABLE IF NOT EXISTS p02_book (
   INDEX idx_p02_book_title_author (title, author),
   INDEX idx_p02_book_category_code (category_code)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '图书';
-
 CREATE TABLE IF NOT EXISTS p02_reader (
   id         bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
   reader_no  varchar(20)     NOT NULL COMMENT '读者证号，业务唯一键',
@@ -239,7 +232,6 @@ CREATE TABLE IF NOT EXISTS p02_reader (
   CONSTRAINT uk_p02_reader_no     UNIQUE (reader_no),
   CONSTRAINT ck_p02_reader_status CHECK (status IN ('ACTIVE', 'FROZEN'))
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '读者';
-
 CREATE TABLE IF NOT EXISTS p02_borrow (
   id          bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
   borrow_no   varchar(24)     NOT NULL COMMENT '借阅单号，业务唯一键',
@@ -278,8 +270,7 @@ CREATE TABLE IF NOT EXISTS p02_borrow (
 - [ ] 每个关联字段都是 `<被引用表单数>_id`，且有 `idx_` 普通索引，并在第 5 节登记了存在性校验。
 - [ ] 第 5 节的「删除前检查引用」与「引用不存在路径用例」都已落到具体错误码与 `TC-` 编号。
 - [ ] `test/orphan-check.sql` 已存在，父表过滤条件写在 `ON` 里，期望结果为 0 行。
-- [ ] 每张表有主键，业务键有 `uk_`，枚举列有 `ck_`，布尔用 `is_` 前缀、时间用 `_at` 后缀。
-- [ ] 字符集与排序规则显式写成 `utf8mb4` / `utf8mb4_general_ci`，引擎为 `InnoDB`。
+- [ ] 每张表有主键，业务键有 `uk_`，枚举列有 `ck_`，布尔用 `is_` 前缀、时间用 `_at` 后缀；字符集与排序规则显式写成 `utf8mb4` / `utf8mb4_general_ci`，引擎为 `InnoDB`。
 - [ ] 字段表「是否索引」列没有空值；不建索引的字段在第 7 节说明了理由。
 - [ ] 每个高频查询都有索引对应，并留下一次 `EXPLAIN` 结论（含 `type` / `key` / `rows`）。
 - [ ] 变更走「扩展—迁移—收缩」三步，回滚 SQL 与正向 SQL 一一对应；`schema.sql` 可重复执行，`seed.sql` 幂等且标注「禁止在生产执行」。

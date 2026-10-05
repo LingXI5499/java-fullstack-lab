@@ -8,8 +8,8 @@
 
 | 页面名 | 路由 | 角色可见性 | 依赖接口 | 主要状态 |
 |---|---|---|---|---|
-| `<学生列表>` | `/students` | `ANONYMOUS` | `GET /api/v1/students`、`DELETE /api/v1/students/{id}` | `loading / loaded / empty / error / submitting` |
-| `<学生新增弹窗>` | 同页弹窗 | `ANONYMOUS` | `POST /api/v1/students`、`GET /api/v1/students/options` | `submitting` |
+| `<学生列表>` | `/students` | `ANONYMOUS` | `GET /api/p01/students`、`DELETE /api/p01/students/{id}` | `loading / loaded / empty / error / submitting` |
+| `<学生新增弹窗>` | 同页弹窗 | `ANONYMOUS` | `POST /api/p01/students`、`GET /api/p01/students/options` | `submitting` |
 
 填写规则：
 
@@ -117,12 +117,12 @@ async function query() {
 
 | 页面动作 | 端点 | 请求字段 | 响应用途 | 失败时的界面 |
 |---|---|---|---|---|
-| 进入列表 / 改条件 / 翻页 | `GET /api/v1/students` | `page,pageSize,keyword,classId,sortBy,sortOrder` | 渲染表格 + 分页器 | 表格区错误态 + 重试按钮 |
-| 打开详情 | `GET /api/v1/students/{id}` | 路径参数 | 详情抽屉字段 | 顶部提示 `STUDENT_NOT_FOUND` 文案 |
-| 点「新增」提交 | `POST /api/v1/students` | `StudentCreateDTO` | 关闭弹窗 + 回第 1 页 | 字段级回填 / 顶部提示 |
-| 点「编辑」提交 | `PUT /api/v1/students/{id}` | `StudentUpdateDTO` | 关闭弹窗 + 当前页刷新 | 字段级回填 / 顶部提示 |
-| 点「删除」确认 | `DELETE /api/v1/students/{id}` | 路径参数 | 当前页刷新（必要时回退页码） | 顶部提示 |
-| 班级选择器输入 | `GET /api/v1/students/options` | `keyword,limit` | 下拉候选列表 | 下拉内联"加载失败，点击重试" |
+| 进入列表 / 改条件 / 翻页 | `GET /api/p01/students` | `page,pageSize,keyword,classId,sortBy,sortOrder` | 渲染表格 + 分页器 | 表格区错误态 + 重试按钮 |
+| 打开详情 | `GET /api/p01/students/{id}` | 路径参数 | 详情抽屉字段 | 顶部提示 `STUDENT_NOT_FOUND` 文案 |
+| 点「新增」提交 | `POST /api/p01/students` | `StudentCreateDTO` | 关闭弹窗 + 回第 1 页 | 字段级回填 / 顶部提示 |
+| 点「编辑」提交 | `PUT /api/p01/students/{id}` | `StudentUpdateDTO` | 关闭弹窗 + 当前页刷新 | 字段级回填 / 顶部提示 |
+| 点「删除」确认 | `DELETE /api/p01/students/{id}` | 路径参数 | 当前页刷新（必要时回退页码） | 顶部提示 |
+| 班级选择器输入 | `GET /api/p01/students/options` | `keyword,limit` | 下拉候选列表 | 下拉内联"加载失败，点击重试" |
 
 闭合规则（G2 判据 4 的判定依据）：
 

@@ -2,7 +2,7 @@
 
 > **用途**：用一张表回答"这一轮到底亏在哪、下一轮只改哪一件事"，把经验变成资产改动而不是感想。
 > **填写时机**：S3 验证与交付完成、G4 通过之后，打 tag 后 **48 小时内**；填完立刻进入「复盘升级」环节产出技能升级提案。
-> **产出位置**：`docs/projects/P0N/retrospective.md`，同时归档到 `projects/P0N-<slug>/docs/retrospective.md`。
+> **产出位置**：`projects/P0N-<slug>/docs/retrospective.md`，同时归档到 `projects/P0N-<slug>/docs/retrospective.md`。
 
 > 复盘的产出不是文字，是**资产 diff**。本文件第 4 节的每一条，都必须能在
 > `docs/pipeline/upgrade-proposals/` 里找到对应的 `SUP-*` 提案（联动见

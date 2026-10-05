@@ -82,14 +82,40 @@ engineering/
 ```text
 projects/P0N-<slug>/
 ├─ README.md            项目说明 + 陌生机器可复现的 Quick Start
-├─ docs/                requirements / design / database / api / testing / deployment /
-│                       progress / discovery / retrospective
-├─ database/            schema.sql / seed.sql
+├─ docs/                本项目全部文档（见下方路径裁决）
+│  ├─ charter.md          01 项目章程
+│  ├─ requirements.md     02–05 需求 / 业务规则 / 验收条件 / 非功能需求
+│  ├─ design.md           06–09 数据设计 / API 契约 / 模块结构 / 页面与状态
+│  ├─ adr/ADR-<NNN>-<slug>.md   10 架构决策（多条时另加 adr.md 汇总）
+│  ├─ progress.md         23 工序账本 + 门禁记录（progress-ledger 模板）
+│  ├─ discovery.md        开发中的发现记录
+│  ├─ testing.md          19–20 测试计划与用例
+│  ├─ deployment.md       22 部署说明（索引到 deploy/runbook.md）
+│  ├─ release.md          23 发布记录
+│  └─ retrospective.md    24 复盘
+├─ database/            schema.sql / seed.sql / migrations/
 ├─ backend/             Maven 工程
 ├─ frontend/            Vue 工程
-├─ test/                冒烟脚本与跨层测试
-└─ deploy/              nginx.conf / systemd unit / docker-compose.yml / runbook
+├─ test/                冒烟脚本与跨层测试（含 orphan-check.sql、evidence/）
+└─ deploy/              nginx.conf / systemd unit / docker-compose.yml / runbook.md
 ```
+
+### 路径裁决（此前模板之间有过冲突，以此为准）
+
+| 内容 | 唯一位置 | 不放在 |
+|---|---|---|
+| 项目章程与全部规格/设计文档 | `projects/P0N-<slug>/docs/` | 不再放 `projects/P0N-<slug>/docs/` |
+| 工序账本、发现记录、复盘 | `projects/P0N-<slug>/docs/` | —— |
+| 接口验证批次记录与证据 | `.../docs/testing/api-verification/AV-*.md` 与 `.../test/evidence/AV-*/`，最新全绿结论汇总到 `.../test/api-verification.md` | —— |
+| 后端单测 | `.../backend/src/test/java/` | `test/` |
+| 前端单测 | `.../frontend/src/**/*.spec.ts` | `test/` |
+| 冒烟脚本（跨层、需起服务） | `tools/smoke/P0N.ps1` | 项目内 |
+| 跨项目共享件（流水线、技能、工作流、模板） | `docs/pipeline/`、`docs/templates/`、`engineering/` | 项目目录 |
+
+理由：**一个项目的东西全部在一起**。串行开发的模式下，"找到这个项目的全部资料"比"把所有项目的同类文档放在一起"更重要；
+跨项目的资产本来就只有一份（技能库与流水线规范），不需要通过目录去共享。
+
+`docs/projects/` 只保留给**尚未建立代码目录的项目**做草稿区；一旦进入工序 11，文档就移入 `projects/P0N-<slug>/docs/`。
 
 技能库通过 `engineering/sync-skills.ps1` 同步到用户的技能目录后，在任意会话中可用；
 **项目之间共享技能，不复制技能。**
@@ -110,12 +136,12 @@ projects/P0N-<slug>/
 
 | 类型 | 格式 | 示例 | 说明 |
 |---|---|---|---|
-| 需求 | `REQ-<模块>-<NN>` | `REQ-STU-01` | 一张需求卡一个编号 |
-| 业务规则 | `BR-<模块>-<NN>` | `BR-STU-02` | 一条规则一个编号 |
-| 验收条件 | `AC-<模块>-<NN>` | `AC-STU-05` | **一条验收条件只描述一个场景**，场景号不嵌套在编号里 |
-| 测试用例 | `TC-<模块>-<场景>-<NN>` | `TC-STU-CREATE-02` | 场景是动词，全大写 |
-| 非功能需求 | `NFR-<分类>-<NN>` | `NFR-PERF-01` | 分类段全大写 |
-| 开发任务 | `TASK-<模块>-<NN>` | `TASK-STU-03` | 垂直切片任务 |
+| 需求 | `REQ-<模块>-<NN>` | `REQ-{0}-0{1}` | 一张需求卡一个编号 |
+| 业务规则 | `BR-<模块>-<NN>` | `BR-{0}-0{1}` | 一条规则一个编号 |
+| 验收条件 | `AC-<模块>-<NN>` | `AC-{0}-0{1}` | **一条验收条件只描述一个场景**，场景号不嵌套在编号里 |
+| 测试用例 | `TC-<模块>-<场景>-<NN>` | `TC-{0}-{1}-0{2}` | 场景是动词，全大写 |
+| 非功能需求 | `NFR-<分类>-<NN>` | `NFR-{0}-0{1}` | 分类段全大写 |
+| 开发任务 | `TASK-<模块>-<NN>` | `TASK-{0}-0{1}` | 垂直切片任务 |
 | 架构决策 | `ADR-<NN>` | `ADR-001` | 三位补零，因为会跨项目累计 |
 | 技能版本 | `<技能名>@<语义化版本>` | `jfsl-scaffold@1.2.0` | —— |
 
@@ -126,8 +152,8 @@ projects/P0N-<slug>/
 
 | 工序 | 名称 | 产出物 | 完成判据 |
 |---|---|---|---|
-| 01 | 项目章程 | `docs/projects/P0N/charter.md` | 定位、技术新增点（1–2 个）、不做范围、成功判据齐备 |
-| 02 | 需求卡 | `docs/projects/P0N/requirements.md` | 每条需求有 `REQ-` 编号、角色、触发场景、期望行为、优先级 |
+| 01 | 项目章程 | `projects/P0N-<slug>/docs/charter.md` | 定位、技术新增点（1–2 个）、不做范围、成功判据齐备 |
+| 02 | 需求卡 | `projects/P0N-<slug>/docs/requirements.md` | 每条需求有 `REQ-` 编号、角色、触发场景、期望行为、优先级 |
 | 03 | 业务规则 | 同上，规则清单节 | 每条规则有 `BR-` 编号，写成"当…且…时，必须…" |
 | 04 | 验收条件 | 同上，验收条件节 | 每条能用 Given/When/Then 写出来，且能判定真假 |
 | 05 | 非功能需求 | 同上，NFR 节 | 指标含数值与测量方法，而不是"要快""要安全" |
@@ -138,11 +164,11 @@ projects/P0N-<slug>/
 
 | 工序 | 名称 | 产出物 | 完成判据 |
 |---|---|---|---|
-| 06 | 数据设计 | `docs/projects/P0N/design.md` 数据节 | 概念-逻辑-物理三层；表和字段含约束与索引；迁移可写出来 |
+| 06 | 数据设计 | `projects/P0N-<slug>/docs/design.md` 数据节 | 概念-逻辑-物理三层；表和字段含约束与索引；迁移可写出来 |
 | 07 | API 契约 | 同上，接口节 | 每个端点的请求/响应/状态码/错误码明确；与页面动作一一对应 |
 | 08 | 模块与包结构 | 同上，结构节 | 类清单到全限定名级别；依赖方向无环 |
 | 09 | 页面与状态 | 同上，前端节 | 每个页面列出 `empty/loading/loaded/error/submitting` 表现 |
-| 10 | 决策记录 | `docs/projects/P0N/adr/ADR-*.md` | 有取舍的地方都有 ADR，含代价与复审触发条件 |
+| 10 | 决策记录 | `projects/P0N-<slug>/docs/adr/ADR-*.md` | 有取舍的地方都有 ADR，含代价与复审触发条件 |
 
 **G2 设计闸门**：契约冻结、权限落点明确、设计可映射到任务（用 [design-completion.md](../templates/design-completion.md) 逐条勾选）。
 

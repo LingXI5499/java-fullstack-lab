@@ -51,7 +51,7 @@
 StudentList.vue（点击"新增"并提交表单）
   ↓ api/student.ts: createStudent(dto)
   ↓ axios（请求拦截器加 token；响应拦截器拆 Result，非 200 抛错）
-  ↓ POST /api/v1/students
+  ↓ POST /api/p01/students
 StudentController.create(@Valid StudentCreateDTO dto)
   ↓ studentService.create(dto)
 StudentServiceImpl.create(dto)        ↓ 【事务开始】
@@ -91,7 +91,7 @@ Result<Long>（Controller 包装）
 ```java
 // <组ID>.p01.controller.StudentController —— AI 提供，完整可编译
 @RestController
-@RequestMapping("/api/v1/students")
+@RequestMapping("/api/p01/students")
 @RequiredArgsConstructor
 public class StudentController {
 
@@ -150,7 +150,7 @@ public interface StudentMapper {
 ```ts
 // frontend/src/api/student.ts —— AI 提供
 export function createStudent(dto: StudentCreateDTO) {
-  return request.post<number>('/api/v1/students', dto)
+  return request.post<number>('/api/p01/students', dto)
 }
 ```
 

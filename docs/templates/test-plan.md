@@ -57,7 +57,7 @@
 | 测试隔离（默认） | 同一个库 + 每个测试方法 `@Transactional` 回滚 + 只操作本项目的 `p0N_` 前缀表 + **测试串行执行**（`maven-surefire` 不开并行），保证不污染开发数据 |
 | 测试隔离（破坏性用例） | 并发、锁、迁移验证需要真实提交，此时使用可丢弃的 `java_fullstack_lab_test` 实例（或用 Docker 起一个临时 MySQL），测试结束整库重建；它**不是**第十一个项目的库 |
 | profile | 测试统一 `test`，通过 `application-test.yml` 指向测试库；禁止在测试里连开发库跑破坏性 SQL |
-| 固定 Clock | 注入 `java.time.Clock`，测试里固定为具体时刻（如 `2025-03-11T10:00:00Z`）；业务代码禁止 `LocalDateTime.now()` / `System.currentTimeMillis()`（`NFR-TEST-01`） |
+| 固定 Clock | 注入 `java.time.Clock`，测试里固定为具体时刻（如 `2025-03-11T10:00:00Z`）；业务代码禁止 `LocalDateTime.now()` / `System.currentTimeMillis()`（`NFR-MAINT-01`） |
 | 随机种子 | 需要随机数据时固定 `Random(20250311)` 或固定 UUID 列表；报告里记录种子，保证失败可复现 |
 | 夹具 | 尽量用 SQL 夹具（`src/test/resources/fixtures/*.sql`）而不是 Service 造数，避免测试依赖业务代码 |
 | 孤儿数据 | 每个项目在 `test/` 提供 `orphan-check.sql`（按本项目逻辑外键逐个 `LEFT JOIN ... WHERE 父.id IS NULL`）；发布前必跑，结果必须为空 |
@@ -96,7 +96,7 @@
 
 ## 8. 示例：P02 图书借阅功能测试计划
 
-**范围**：`REQ-BOOK-01`（借书）、`REQ-BOOK-02`（还书）；`BR-BOOK-01`（库存 > 0 才可借）、`BR-BOOK-02`（同一读者同一本书未还不可重复借）、`BR-BOOK-03`（借期 30 天）、`BR-BOOK-04`（已归还不可重复归还）；`NFR-TEST-01`（固定 Clock）。
+**范围**：`REQ-BOOK-01`（借书）、`REQ-BOOK-02`（还书）；`BR-BOOK-01`（库存 > 0 才可借）、`BR-BOOK-02`（同一读者同一本书未还不可重复借）、`BR-BOOK-03`（借期 30 天）、`BR-BOOK-04`（已归还不可重复归还）；`NFR-MAINT-01`（固定 Clock）。
 
 ### 8.1 风险清单（按 影响 × 概率 排序）
 

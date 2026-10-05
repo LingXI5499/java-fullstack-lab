@@ -51,7 +51,7 @@
 |---|---|
 | 判据 | 新增 / 修改 / 回滚三种变更都能写出脚本，表结构自带约束与索引 |
 | 通过标准 | 每张表有主键、非空、唯一或 `ck_` 约束；**逻辑外键字段必须建 `idx_` 索引且不得出现物理外键**；高频查询有索引且给出 `EXPLAIN` 结论；新增 / 修改 / 回滚三种变更都能写出脚本；变更按「扩展—迁移—收缩」三步写，且每步有回滚 SQL；`schema.sql` 与 `seed.sql` 分离 |
-| 证据放在哪 | `projects/P0N-<slug>/database/schema.sql`、`database/seed.sql`；`docs/data-design.md#5`、`#6` |
+| 证据放在哪 | `projects/P0N-<slug>/database/schema.sql`、`database/seed.sql`；`docs/data-design.md#7`（索引设计）、`#8`（物理层）、`test/orphan-check.sql` |
 | 判定 | [ ] 通过　[ ] 不通过（原因：） |
 
 ### 判据 4 API 契约与页面状态一一对应（硬门槛）
@@ -96,7 +96,7 @@
 |---|---|
 | 判据 | 参数化 SQL、索引、脱敏、超时四类措施都有具体数值或规则，并写明怎么验证 |
 | 通过标准 | Mapper 一律 `#{}`，`${}` 仅用于白名单场景且写明白名单来源；敏感字段（密码 / 手机号 / 证件号）脱敏位置与规则明确；JDBC / 查询超时、上传大小上限、分页上限给出数值；每条措施对应一种验证方式（单测 / `EXPLAIN` / 日志 / 冒烟脚本） |
-| 证据放在哪 | `docs/api-contract.md#7`（分页与排序）、`#6`（校验）；`docs/data-design.md#5`；`docs/class-responsibility.md#1` |
+| 证据放在哪 | `docs/api-contract.md#7`（分页与排序）、`#6`（校验）；`docs/data-design.md#7`；`docs/class-responsibility.md#1` |
 | 判定 | [ ] 通过　[ ] 不通过（原因：） |
 
 ### 判据 9 设计可映射到任务清单

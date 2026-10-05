@@ -13,7 +13,7 @@
 - 交付流水线规范 `docs/pipeline/delivery-pipeline.md`：7 阶段 / 23 工序 / 4 闸门 + 复盘升级三步。
 - 技能与工作流地图 `docs/pipeline/skills-map.md`：10 个技能立项、6 个工作流、版本与升级规则。
 - 度量与升级日志骨架 `docs/pipeline/metrics.md`、`docs/pipeline/upgrade-log.md`。
-- P01 规格包 `docs/projects/P01/`：项目章程 + 需求/业务规则/验收条件/非功能需求。
+- P01 规格包 `projects/P01-student-info/docs/`：项目章程 + 需求/业务规则/验收条件/非功能需求。
 - 20 份可复制模板 `docs/templates/`（含索引 README），覆盖 S0–S3 与复盘升级的全部工序。
 - **标识符约定**：`REQ/BR/AC/TC/NFR/TASK-<模块>-<两位序号>`，模块段与场景段全大写、序号两位补零；
   写入 `AGENTS.md` §3.7 与交付流水线规范第 2 节。

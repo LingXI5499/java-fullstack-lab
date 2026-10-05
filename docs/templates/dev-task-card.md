@@ -2,7 +2,7 @@
 
 > **用途**：把一条需求切成"从 Vue 到 MySQL 一条打穿"的最小可交付功能，并写清 AI 给了什么骨架、用户要写哪几段业务代码。
 > **填写时机**：S2 实现阶段，**动手写第一行代码之前**。每张卡对应工序 13–18 的一段工作；G3 开发闸门按卡逐张判定。
-> **产出位置**：`docs/projects/P0N/modules/TASK-<模块>-<两位序号>.md`（模块多时按模块建子目录）。
+> **产出位置**：`projects/P0N-<slug>/docs/modules/TASK-<模块>-<两位序号>.md`（模块多时按模块建子目录）。
 
 ## 1. 为什么本流水线用垂直切片
 
@@ -38,7 +38,8 @@
 
 > **编号口径**（与 `AGENTS.md` §3.7 一致）：模块段取项目 `requirements.md` 第 0 节**模块字典**里的短码，全大写、序号两位补零。
 > 例：P01 学生模块 `STU` → `TASK-STU-01`、`REQ-STU-01`、`BR-STU-02`、`AC-STU-03`；P02 图书模块 `BOOK` → `TC-BOOK-BORROW-01`。
-> 不允许 `REQ-stu-1` 这类小写不补零写法，也不允许一个项目里 `student` 与 `STU` 混用。
+> 非功能编号 `NFR-<分类>-<两位序号>`，分类只用固定 8 类缩写：`PERF` / `SEC` / `AVAIL` / `RELIAB` / `MAINT` / `SCALE` / `COMPAT` / `OBS`。
+> 不允许 `REQ-STU-01` 这类小写不补零写法，也不允许一个项目里 `student` 与 `STU` 混用。
 
 ## 3. 空白副本（可整段复制）
 
@@ -139,7 +140,7 @@ public Long create(StudentCreateDTO dto) {
     // TODO(user): 校验学号唯一（先 count 再 insert），重复时抛 StudentNoDuplicatedException - STU
     // TODO(user): 校验手机号唯一，重复时抛 PhoneDuplicatedException - STU
     Student student = StudentConverter.toEntity(dto);
-    // TODO(user): 补全审计字段（createdAt 用固定 Clock 注入，禁止 System.currentTimeMillis()）- NFR-TEST-01
+    // TODO(user): 补全审计字段（createdAt 用固定 Clock 注入，禁止 System.currentTimeMillis()）- NFR-MAINT-01
     studentMapper.insert(student);
     return student.getId();
 }

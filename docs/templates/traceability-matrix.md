@@ -79,7 +79,7 @@ grep -rn "create table" database/migrations/
 grep -rn "REQ-STU-" src/test/java/
 
 # 每个 REQ 至少要能匹配到一条 TC
-for id in $(grep -o "REQ-STU-[0-9]*" docs/projects/P01-student-info/docs/requirements.md | sort -u); do
+for id in $(grep -o "REQ-STU-[0-9]*" projects/P01-student-info/docs/requirements.md | sort -u); do
   grep -rq "$id" src/test/java/ || echo "untested: $id"
 done
 ```
@@ -90,8 +90,8 @@ done
 
 ```bash
 # 每条 BR 应至少被一条验收条件或测试用例引用
-grep -rn "BR-STU-" docs/projects/P01-student-info/docs/business-rules.md
-grep -rn "BR-STU-" docs/projects/P01-student-info/docs/acceptance-criteria.md
+grep -rn "BR-STU-" projects/P01-student-info/docs/business-rules.md
+grep -rn "BR-STU-" projects/P01-student-info/docs/acceptance-criteria.md
 ```
 
 判定：`business-rules.md` 中出现、但 `acceptance-criteria.md` 与 `src/test/` 中均未出现的 `BR-*`，

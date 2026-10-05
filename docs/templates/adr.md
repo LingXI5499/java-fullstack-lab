@@ -88,8 +88,8 @@ PROPOSED ──G2 通过──> ACCEPTED ──被新 ADR 取代──> SUPERSED
 
 - 状态：ACCEPTED
 - 日期：2026-01-05
-- 关联需求：NFR-可维护性-001、STU
-- 关联设计：`docs/data-design.md#5-索引设计`、`docs/class-responsibility.md#1-分层职责与禁止事项`
+- 关联需求：NFR-MAINT-01、REQ-STU-03
+- 关联设计：`docs/data-design.md#7-索引设计`、`docs/class-responsibility.md#1-分层职责与禁止事项`
 
 ### 背景
 
@@ -127,9 +127,9 @@ PROPOSED ──G2 通过──> ACCEPTED ──被新 ADR 取代──> SUPERSED
 
 ## 5. 示例二：ADR-002 为什么文件存储要抽象 `storage/`，默认本地磁盘
 
-- 状态：ACCEPTED
-- 日期：2026-01-05
-- 关联需求：FILE、NFR-可测试性-002
+- 状态：PROPOSED（P01–P05 不实施；到 P06 需要文件上传且拿到密钥时随该项目的 G2 定稿为 ACCEPTED，见 AGENTS.md §2 推迟清单）
+- 日期：<P06 设计阶段日期>
+- 关联需求：NFR-COMPAT-01、REQ-FILE-01
 - 关联设计：`docs/class-responsibility.md#1-分层职责与禁止事项`
 
 ### 背景
@@ -178,7 +178,7 @@ PROPOSED ──G2 通过──> ACCEPTED ──被新 ADR 取代──> SUPERSED
 | 异常体系 | 公共基类持有 `code / message / httpStatus`，每个错误一个子类 | `AGENTS.md` §3 | 否 |
 | ORM | MyBatis 手写 Mapper XML，禁止 MyBatis-Plus | ADR-001 | 否（已决） |
 | 数据库 | 库 `java_fullstack_lab`，表前缀 `p0N_`，`utf8mb4` / `utf8mb4_general_ci` | `docs/dev-env.md` | 否 |
-| 文件存储 | `storage/` 抽象 + 本地磁盘默认实现 | ADR-002 | 否（已决） |
+| 文件存储 | `storage/` 抽象 + 本地磁盘默认实现（推迟到 P06） | ADR-002 | 否（已决策方向，P06 才实施） |
 | 秘密管理 | 连接串与密钥只走环境变量或 `application-local.yml` | `AGENTS.md` §3 | 否 |
 | 注释风格 | 用 `//` 与 `/* */`，不写 Javadoc | `AGENTS.md` §3 | 否 |
 
