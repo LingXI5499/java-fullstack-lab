@@ -1,0 +1,61 @@
+# ---- Java / Maven ----
+**/target/
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties.bak
+
+# ---- Node / Frontend ----
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.vite/
+*.local
+pnpm-lock.yaml.orig
+
+# ---- IDE ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Local configuration & secrets ----
+.env
+.env.*
+!.env.example
+**/application-local.yml
+**/application-local.yaml
+**/application-local.properties
+**/application-secret.yml
+**/application-secret.properties
+!**/application-local.yml.example
+!**/application-local.properties.example
+
+# ---- Runtime ----
+*.log
+logs/
+*.pid
+*.hprof
+
+# ---- Agent / temp ----
+.workbuddy/
+tmp/
+.tmp/
+scratch/
+*.bak-*
+
+# ---- Uploads produced at runtime ----
+**/uploads/
+
+# ---- Local-only scratch (never publish) ----
+.local-notes/
+PRIVATE-*.md
+TODO-local-*.md

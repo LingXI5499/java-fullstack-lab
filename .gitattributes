@@ -1,0 +1,31 @@
+# 仓库内的换行归一化：检出即 LF，避免 Windows/CI 之间的 CRLF 噪音。
+# 例外：PowerShell 脚本使用 CRLF（见 .editorconfig）。
+* text=auto eol=lf
+
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.jar binary
+*.zip binary
+
+# 中文文档统一按文本处理，避免被误判为二进制
+*.md text diff merge
+*.sql text
+*.java text
+*.xml text
+*.yml text
+*.yaml text
+*.json text
+*.vue text
+*.ts text
+*.js text
