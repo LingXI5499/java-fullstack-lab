@@ -1,6 +1,6 @@
 # 开发环境与版本约定
 
-本文件让**一台陌生机器**能在 5 分钟内判断自己是否具备运行本仓库的条件（对应验收判据 AC-8）。
+本文件让**一台陌生机器**能在 5 分钟内判断自己是否具备运行本仓库的条件（对应验收判据 AC-STU-08）。
 
 ## 1. 最低要求
 
@@ -40,17 +40,20 @@ javap -v projects\P01-student-info\backend\target\classes\com\...\XxxApplication
 ## 3. 数据库约定
 
 - 一个库：`java_fullstack_lab`（`utf8mb4` / `utf8mb4_general_ci`）
-- 每项目独立表前缀：P01 → `p01_*`，P02 → `p02_*`，以此类推（互不干扰，可共存）
+- 每项目独立表前缀：P01 → `p01_*`，P02 → `p02_*`，以此类推（同一个库里物理隔离，可共存）
 - 连接信息只写在**已 gitignore** 的 `backend/src/main/resources/application-local.yml`
 - 仓库内只保留 `application-local.yml.example`，默认从环境变量读取：
 
 ```yaml
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/java_fullstack_lab?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/java_fullstack_lab?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
 ```
+
+> `allowPublicKeyRetrieval=true` 是 MySQL 8 默认 `caching_sha2_password` 认证在非 SSL 连接下所需，
+> 缺失时会报 `Public Key Retrieval is not allowed`。仅用于本地开发，生产环境应走 TLS。
 
 建库：
 

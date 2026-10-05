@@ -16,11 +16,18 @@
 | JDK | 编译目标 17（`maven.compiler.release=17`），本机 JDK 21 可编译 |
 | Spring Boot | 3.2.x |
 | ORM | MyBatis，**手写 Mapper XML**，禁止引入 MyBatis-Plus |
-| 数据库 | MySQL 8，库 `java_fullstack_lab`，每项目表前缀 `p0N_` |
+| 数据库 | MySQL 8；**单库 `java_fullstack_lab`**，每项目表前缀 `p0N_` 做隔离 |
 | 前端 | Vue 3 + Vite + TypeScript + Pinia + Element Plus + ECharts，pnpm workspace |
 | 测试 | JUnit 5 + Mockito + MockMvc；集成测试用真实 MySQL |
 | 文档 | SpringDoc OpenAPI（契约先行） |
 | 部署 | Nginx + systemd；Docker Compose 仅作可选交付物 |
+
+**推迟到真正需要时再引入的技术**（不要提前实现）：
+
+- 云对象存储（OSS）与 `storage/` 抽象 —— 到 P06 需要文件上传、且拿到密钥时再做；
+- 域名、HTTPS 证书、真实服务器 —— 到真实部署时再处理；
+- 其余见第 8 节非目标。
+
 
 ## 3. 硬性编码约定
 
@@ -37,10 +44,24 @@
 5. **Controller 只做**：参数绑定、`@Valid`、调 Service、返回 `Result<T>`。
    不写 SQL、不写业务判断、不逐个 `try/catch`。
 6. **注释风格**：用 `//` 与 `/* */`，**不写 Javadoc 文档注释**。
-7. **命名规范**：需求 `REQ-模块-序号`、业务规则 `BR-模块-序号`、非功能 `NFR-分类-序号`、测试用例 `TC-模块-场景-序号`；
-   数据库约束前缀 `fk_` / `ck_` / `idx_`；表名业务单数（`p01_student`）。
+7. **命名规范**：需求 `REQ-模块-两位序号`、业务规则 `BR-模块-两位序号`、验收条件 `AC-模块-两位序号`、
+   测试用例 `TC-模块-场景-两位序号`、非功能 `NFR-分类-两位序号`、任务 `TASK-模块-两位序号`、决策 `ADR-三位序号`；
+   **模块段与场景段全大写、序号两位补零**（例 `REQ-STU-01`、`TC-STU-CREATE-02`，不写 `REQ-stu-1`）；
+   模块段必须来自项目 `requirements.md` 第 0 节的模块字典。数据库约束前缀 `uk_` / `idx_` / `ck_`；表名业务单数（`p01_student`）。
 8. **秘密不入库**：所有连接串、密钥走环境变量或 `application-local.yml`（已 gitignore），
    仓库内只保留 `*.example`。
+9. **单库 + 前缀隔离**（数据库铁律）：
+   - 全仓库只有一个库 `java_fullstack_lab`，十个项目共用，**不各自建库**；
+   - 每个项目的所有表以 `p<两位项目号>_` 为前缀，例如 P01 的 `p01_student`、P02 的 `p02_book`；
+   - 约束命名：`uk_` / `idx_` / `ck_` 前缀，字段 `snake_case`，布尔 `is_` 前缀，时间 `_at` 后缀；
+   - **一个项目的 SQL 只允许出现自己的前缀**（门禁自动扫描），禁止跨项目 JOIN；
+   - 迁移脚本：`database/migrations/V<版本>__<说明>.sql`。
+10. **禁止物理外键，只用逻辑外键**（数据库铁律）：
+    - `schema.sql` 中**不得出现 `FOREIGN KEY` 与 `REFERENCES`**，不允许 `ON DELETE CASCADE`；
+    - 关联通过 `<被引用表单数>_id` 字段（如 `p01_student.class_id`）表达，该字段**必须建普通索引**；
+    - 引用完整性由**应用层保证**：写入前校验被引用记录存在，删除前校验无引用方；
+    - 三条强制要求：① 删除父记录前显式检查子记录并返回业务错误码；
+      ② 每个关联字段都要有"引用不存在"路径的用例；③ 每个项目在 `test/` 提供孤儿数据排查 SQL。
 
 ## 4. 流水线与闸门
 
